@@ -1,6 +1,7 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { getAll, getById, create, remove } from "./todos.js"
+import { ensureSchema } from './db.js'
 
 const app = new Hono()
 
@@ -8,13 +9,14 @@ app.get('/', (c) => {
   return c.json({ message: "Todo API is running" })
 })
 
-app.get("/api/todos", (c) => {
-  return c.json(getAll())
+app.get("/api/todos", async (c) => {
+  const todos = await getAll()
+  return c.json(todos)
 })
 
-app.get("/api/todos/:id", (c) => {
+app.get("/api/todos/:id", async (c) => {
   const id = Number(c.req.param("id"))
-  const todo = getById(id)
+  const todo = await getById(id)
   if (!todo) {
     return c.json({ error: "not found" }, 404)
   }
@@ -30,9 +32,9 @@ app.post("/api/todos", async (c) => {
   return c.json(todo, 201)
 })
 
-app.delete("/api/todos/:id", (c) => {
+app.delete("/api/todos/:id", async (c) => {
   const id = Number(c.req.param("id"))
-  const ok = remove(id)
+  const ok = await remove(id)
   if (!ok) {
     return c.json({ error: "not found" }, 404)
   }
@@ -41,9 +43,15 @@ app.delete("/api/todos/:id", (c) => {
 
 const port = Number(process.env.PORT) || 8080
 
-serve({
-  fetch: app.fetch,
-  port: port,
-})
+async function main() {
+  await ensureSchema()
 
-console.log(`Server is running on port ${port}`)
+  serve({
+    fetch: app.fetch,
+    port,
+  })
+
+  console.log(`Server is running on port ${port}`)
+}
+
+main()

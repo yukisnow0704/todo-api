@@ -7,14 +7,39 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    services:
+      postgress:
+        image: postgres:16
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: todoapp_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
+
       - run: npm ci
+
       - run: npm test
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_USER: testuser
+          DB_PASSWORD: testpass
+          DB_NAME: todoapp_test
   
   deploy:
     needs: test
@@ -43,4 +68,7 @@ jobs:
             --region=asia-northeast1 \
             --platform=managed \
             --allow-unauthenticated \
+            --add-cloudsql-instance=${{ secrets.INSTANCE_CONNECTION_NAME }} \
+            --set-env-vars=INSTANCE_CONNECTION_NAME=${{ secrets.INSTANCE_CONNECTION_NAME }} \
+            --set-secrets=DB_PASSWORD=todo-db-password:latest \
             --project=${{ secrets.GCP_PROJECT_ID }}

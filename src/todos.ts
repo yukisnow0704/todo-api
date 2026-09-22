@@ -1,32 +1,35 @@
+import { pool } from "./db.js"
+
 export type Todo = {
     id: number
     title: string
     done: boolean
 }
 
-let todos: Todo[] = [
-    { id: 1, title: "Honoを学ぶ", done: false },
-    { id: 2, title: "Cloud Runにデプロイする", done: false},
-]
-
-let nextId = 3
-
-export function getAll(): Todo[] {
-    return todos
+export async function getAll(): Promise<Todo[]> {
+    const result = await pool.query<Todo>(
+        "SELECT id, title, done FROM todos ORDER BY id"
+    )
+    return result.rows
 }
 
-export function getById(id: number): Todo | undefined {
-    return todos.find((t) => t.id === id)
+export async function getById(id: number): Promise<Todo | undefined> {
+    const result = await pool.query<Todo>(
+        "SELECT id, title, done FROM todos WHERE id = $1",
+        [id]
+    )
+    return result.rows[0]
 }
 
-export function create(title: string): Todo {
-    const todo: Todo = { id: nextId++, title, done: false }
-    todos.push(todo)
-    return todo
+export async function create(title: string): Promise<Todo> {
+    const result = await pool.query<Todo>(
+        "INSERT INTO todos (title, done) VALUES ($1, false) RETURNING id, title, done",
+        [title]
+    )
+    return result.rows[0]
 }
 
-export function remove(id: number): boolean {
-    const before = todos.length
-    todos = todos.filter((t) => t.id !== id)
-    return todos.length < before
+export async function remove(id: number): Promise<boolean> {
+    const result = await pool.query("DELETE FROM todos WHERE id = $1", [id])
+    return (result.rowCount ?? 0) > 0
 }
