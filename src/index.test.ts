@@ -4,7 +4,7 @@ import { ensureSchema, pool } from "./db.js"
 import { get } from "node:http"
 
 beforeAll(async () => {
-    await ensureSchema
+    await ensureSchema()
 })
 
 beforeEach(async () => {
