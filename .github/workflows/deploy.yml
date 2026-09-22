@@ -69,6 +69,6 @@ jobs:
             --platform=managed \
             --allow-unauthenticated \
             --add-cloudsql-instances=${{ secrets.INSTANCE_CONNECTION_NAME }} \
-            --set-env-vars=INSTANCE_CONNECTION_NAME=${{ secrets.INSTANCE_CONNECTION_NAME }} \
+            --set-env-vars=INSTANCE_CONNECTION_NAME=${{ secrets.INSTANCE_CONNECTION_NAME }},DB_NAME=appuser,DB_NAME=todoapp \
             --set-secrets=DB_PASSWORD=todo-db-password:latest \
             --project=${{ secrets.GCP_PROJECT_ID }}
