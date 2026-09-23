@@ -3,8 +3,8 @@ import { VertexAI } from "@google-cloud/vertexai";
 const CATEGORIES = ["仕事", "買い物", "家事", "健康", "学習", "その他"] as const;
 
 const vertexAI = new VertexAI({
-    project: process.env.GOOGLE_CLOUD_PROJECT ?? "my-hono-app-v2",
-    location: "asia-northeast1",
+  project: process.env.GOOGLE_CLOUD_PROJECT ?? "my-hono-app-v2",
+  location: "us-central1",
 });
 
 const model = vertexAI.getGenerativeModel({
