@@ -26,10 +26,23 @@ export async function create(title: string): Promise<Todo> {
         "INSERT INTO todos (title, done) VALUES ($1, false) RETURNING id, title, done",
         [title]
     )
+    console.log(JSON.stringify({
+        event: "todo_operation",
+        operation: "create",
+        todoId: result.rows[0].id,
+        title: result.rows[0].title,
+        timestamp: new Date().toISOString(),
+    }));
     return result.rows[0]
 }
 
 export async function remove(id: number): Promise<boolean> {
     const result = await pool.query("DELETE FROM todos WHERE id = $1", [id])
+    console.log(JSON.stringify({
+        event: "todo_operation",
+        operation: "delete",
+        todoId: id,
+        timestamp: new Date().toISOString(),
+    }));
     return (result.rowCount ?? 0) > 0
 }
