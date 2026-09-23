@@ -32,6 +32,10 @@ export async function ensureSchema(): Promise<void> {
             id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
             done BOOLEAN NOT NULL DEFAULT FALSE
+            category TEXT
         )
+    `)
+    await pool.query(`
+        ALTER TABLE todos ADD COLUMN IF NOT EXISTS category TEXT
     `)
 }
