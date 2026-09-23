@@ -18,3 +18,8 @@ variable "db_password" {
     sensitive = true
     description = "20260922PW"
 }
+
+variable "alert_email" {
+  type        = string
+  description = "yukisnow.ni2@gmail.com"
+}

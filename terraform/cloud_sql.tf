@@ -11,7 +11,15 @@ resource "google_sql_database_instance" "todo_api_db" {
     disk_type = "PD_HDD"
 
     backup_configuration {
-      enabled = false
+      enabled = true
+      start_time = "18:00"
+      point_in_time_recovery_enabled = true
+      transaction_log_retention_days = 7
+
+      backup_retention_settings {
+        retained_backups = 7
+        retention_unit = "COUNT"
+      }
     }
   }
 
