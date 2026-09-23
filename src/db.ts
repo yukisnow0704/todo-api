@@ -31,7 +31,7 @@ export async function ensureSchema(): Promise<void> {
         CREATE TABLE IF NOT EXISTS todos (
             id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
-            done BOOLEAN NOT NULL DEFAULT FALSE
+            done BOOLEAN NOT NULL DEFAULT FALSE,
             category TEXT
         )
     `)
