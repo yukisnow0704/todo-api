@@ -61,6 +61,17 @@ jobs:
           docker build -t asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/todo-api-repo/todo-api:${{ github.sha }} .
           docker push asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/todo-api-repo/todo-api:${{ github.sha }}
       
+      - name: Set environment
+        id: env
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "environment=production" >> "$GITHUB_OUTPUT"
+            echo "service_name=todo-api" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+            echo "service_name=todo-api-staging" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy todo-api \

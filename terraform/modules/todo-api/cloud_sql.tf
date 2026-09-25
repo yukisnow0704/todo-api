@@ -1,10 +1,11 @@
 resource "google_sql_database_instance" "todo_api_db" {
-  name             = "todo-api-db"
+  name             = "todo-api-db${local.name_suffix}"
   database_version = "POSTGRES_16"
   region           = var.region
 
   settings {
     tier              = "db-f1-micro"
+    edition = "ENTERPRISE"
     activation_policy = "ALWAYS"
 
     disk_size = 10
