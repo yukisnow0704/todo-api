@@ -23,7 +23,7 @@ resource "google_monitoring_uptime_check_config" "todo_api" {
     type = "uptime_url"
     labels = {
       project_id = var.project_id
-      host = replace(replace(google_cloud_run_v2_service.todo_api.uri, "https://", ""), "/", "")
+      host = replace(replace(module.todo_api.cloud_run_url, "https://", ""), "/", "")
     }
   }
 }

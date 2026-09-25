@@ -1,0 +1,13 @@
+module "todo_api" {
+  source = "../../modules/todo-api"
+
+  project_id = var.project_id
+  region = var.region
+  environment = "staging"
+  db_password = var.db_password
+  alert_email = var.alert_email
+}
+
+output "cloud_run_url" {
+  value       = module.todo_api.cloud_run_url
+}

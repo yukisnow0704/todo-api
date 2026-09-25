@@ -1,7 +1,8 @@
 resource "google_cloud_run_v2_service" "todo_api" {
-  name     = "todo-api"
+  name     = "todo-api${local.name_suffix}"
   location = var.region
   ingress  = "INGRESS_TRAFFIC_ALL"
+  deletion_protection = false
 
   template {
     containers {
@@ -10,7 +11,7 @@ resource "google_cloud_run_v2_service" "todo_api" {
 
       env {
         name  = "INSTANCE_CONNECTION_NAME"
-        value = "${var.project_id}:${var.region}:todo-api-db"
+        value = "${var.project_id}:${var.region}:${google_sql_database_instance.todo_api_db.name}"
       }
       env {
         name  = "DB_USER"
