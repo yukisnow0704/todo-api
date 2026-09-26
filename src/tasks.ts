@@ -19,7 +19,7 @@ export async function enqueueAnalyzeTodoTask(todoId: number, title: string): Pro
             httpRequest: {
                 httpMethod: "POST",
                 url: `${WORKER_URL}/internal/tasks/analyze-todo`,
-                Headers: {
+                headers: {
                     "Content-Type": "application/json",
                     "X-Worker-Secret": WORKER_SELRET,
                 },
