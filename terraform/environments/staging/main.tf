@@ -6,6 +6,7 @@ module "todo_api" {
   environment = "staging"
   db_password = var.db_password
   alert_email = var.alert_email
+  image_tag = var.image_tag
 }
 
 output "cloud_run_url" {

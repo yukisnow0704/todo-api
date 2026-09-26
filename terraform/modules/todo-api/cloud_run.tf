@@ -10,7 +10,7 @@ resource "google_cloud_run_v2_service" "todo_api" {
   template {
     containers {
       # イメージはCI/CDが書き換える前提なので、ここでは現在のタグを指定
-      image = "asia-northeast1-docker.pkg.dev/${var.project_id}/todo-api-repo/todo-api:latest"
+      image = "asia-northeast1-docker.pkg.dev/${var.project_id}/todo-api-repo/todo-api:${var.image_tag}"
 
       env {
         name  = "INSTANCE_CONNECTION_NAME"
@@ -54,12 +54,6 @@ resource "google_cloud_run_v2_service" "todo_api" {
         instances = [google_sql_database_instance.todo_api_db.connection_name]
       }
     }
-  }
-
-  lifecycle {
-    # docker build & push はCI/CDが行うので、Terraformがイメージタグの差分で
-    # 余計なplanを出さないよう無視する
-    ignore_changes = [template[0].containers[0].image]
   }
 }
 

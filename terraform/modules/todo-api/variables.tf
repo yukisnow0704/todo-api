@@ -21,6 +21,12 @@ variable "alert_email" {
   type        = string
 }
 
+variable "image_tag" {
+  type = string
+  description = "..."
+  default     = "latest"
+}
+
 locals {
   name_suffix = var.environment == "production" ? "" : "-${var.environment}"
 }

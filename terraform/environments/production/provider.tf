@@ -21,3 +21,8 @@ variable "db_password" {
 variable "alert_email" {
   type        = string
 }
+
+variable "image_tag" {
+  type        = string
+  default     = "latest"
+}
