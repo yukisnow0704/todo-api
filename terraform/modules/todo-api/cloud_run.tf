@@ -1,8 +1,11 @@
+locals {
+  worker_url = "https://todo-api${local.name_suffix}-${data.google_project.current.number}.${var.region}.run.app"
+}
+
 resource "google_cloud_run_v2_service" "todo_api" {
   name     = "todo-api${local.name_suffix}"
   location = var.region
   ingress  = "INGRESS_TRAFFIC_ALL"
-  deletion_protection = false
 
   template {
     containers {
@@ -26,6 +29,19 @@ resource "google_cloud_run_v2_service" "todo_api" {
         value_source {
           secret_key_ref {
             secret  = google_secret_manager_secret.todo_db_password.secret_id
+            version = "latest"
+          }
+        }
+      }
+      env {
+        name = "WORKER_URL"
+        value = local.worker_url
+      }
+      env {
+        name = "WORKER_SECRET"
+        value_source {
+          secret_key_ref {
+            secret = google_secret_manager_secret.worker_secret.secret_id
             version = "latest"
           }
         }
