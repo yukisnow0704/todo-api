@@ -34,10 +34,10 @@ export async function create(title: string): Promise<Todo> {
     const todo = result.rows[0];
 
     enqueueAnalyzeTodoTask(todo.id, todo.title).catch((error) => {
-        console.error(JSON.stringify({ event: "enqueue_eeror", message: String(error) }));
+        console.error(JSON.stringify({ event: "enqueue_error", message: String(error) }));
     });
 
-    return c.json(todo, 201);
+    return todo;
 }
 
 export async function remove(id: number): Promise<boolean> {
