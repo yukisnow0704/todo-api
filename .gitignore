@@ -40,3 +40,8 @@ terraform/*.sql
 # terraform (追加分)
 terraform/environments/*/terraform.tfstate.*
 cloud-sql-proxy.x64.exe
+
+terraform/**/*.json
+terraform/**/*.sql
+terraform/**/tfplan
+body.json

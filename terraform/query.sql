@@ -1,1 +1,0 @@
-SELECT timestamp, jsonPayload FROM `my-hono-app-v2.todo_api_logs.run_googleapis_com_stdout` LIMIT 10
