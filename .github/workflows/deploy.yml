@@ -71,7 +71,7 @@ jobs:
             echo "environment=staging" >> "$GITHUB_OUTPUT"
             echo "service_name=todo-api-staging" >> "$GITHUB_OUTPUT"
           fi
-          
+
       - name: Get project number
         id: project
         run: echo "number=$(gcloud projects describe ${{ secrets.GCP_PROJECT_ID }} --format='value(projectNumber)')" >> "$GITHUB_OUTPUT"
@@ -84,6 +84,6 @@ jobs:
             --platform=managed \
             --allow-unauthenticated \
             --add-cloudsql-instances=${{ secrets.INSTANCE_CONNECTION_NAME }} \
-            --set-env-vars=INSTANCE_CONNECTION_NAME=${{ secrets.INSTANCE_CONNECTION_NAME }},DB_USER=appuser,DB_NAME=todoapp,WORKER_URL=https://todo-api-${{ steps.project.outputs.number }}.asia-northeast1.run.app \
+            --set-env-vars=INSTANCE_CONNECTION_NAME=${{ secrets.INSTANCE_CONNECTION_NAME }},DB_USER=appuser,DB_NAME=todoapp,WORKER_URL=https://todo-api-${{ secrets.GCP_PROJECT_NUMBER }}.asia-northeast1.run.app \
             --set-secrets=DB_PASSWORD=todo-db-password:latest,WORKER_SECRET=worker-secret:latest \
             --project=${{ secrets.GCP_PROJECT_ID }}
