@@ -1,6 +1,6 @@
-import { cloudTasksClient } from "@google-cloud/tasks";
+import { CloudTasksClient } from "@google-cloud/tasks";
 
-const tasksClient = new cloudTasksClient();
+const tasksClient = new CloudTasksClient();
 
 const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT ?? "my-hono-app-v2";
 const LOCATION = "asia-northeast1"
