@@ -36,3 +36,7 @@ lerna-debug.log*
 terraform/tfplan
 terraform/*.json
 terraform/*.sql
+
+# terraform (追加分)
+terraform/environments/*/terraform.tfstate.*
+cloud-sql-proxy.x64.exe
