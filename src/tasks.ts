@@ -1,3 +1,9 @@
+import { vi } from "vitest";
+
+vi.mock("./tasks.js", () => ({
+    enqueueAnalyzeTodoTask: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { CloudTasksClient } from "@google-cloud/tasks";
 
 const tasksClient = new CloudTasksClient();
