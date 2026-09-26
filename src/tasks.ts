@@ -23,7 +23,7 @@ export async function enqueueAnalyzeTodoTask(todoId: number, title: string): Pro
                     "Content-Type": "application/json",
                     "X-Worker-Secret": WORKER_SELRET,
                 },
-                body: Buffer.from(payload).toString("base64");
+                body: Buffer.from(payload).toString("base64"),
             },
         },
     });
