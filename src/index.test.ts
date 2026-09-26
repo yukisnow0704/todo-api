@@ -1,3 +1,9 @@
+import { vi } from "vitest";
+
+vi.mock("./tasks.js", () => ({
+    enqueueAnalyzeTodoTask: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest"
 import { getAll, getById, create, remove } from "./todos.js"
 import { ensureSchema, pool } from "./db.js"
