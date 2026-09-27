@@ -1,13 +1,19 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
-import { getAll, getById, create, remove } from "./todos.js"
+import { getAll, getById, create, update, remove } from "./todos.js"
+import { UpdatableFields } from "./todosjs"
 import { ensureSchema, pool } from './db.js'
 import { analyzeTodo } from './classify.js'
+import { uiHtml } from './ui.js'
 
 const app = new Hono()
 
 app.get('/', (c) => {
   return c.json({ message: "Todo API is running" })
+})
+
+app.get('/ui', (c) => {
+  return c.html(uiHtml)
 })
 
 app.get("/api/todos", async (c) => {
@@ -31,6 +37,16 @@ app.post("/api/todos", async (c) => {
   }
   const todo = await create(body.title)
   return c.json(todo, 201)
+})
+
+app.patch("/api/todos/:id", async (c) => {
+  const id = Number(c.req.param("id"))
+  const body = await c.req.json<UpdatableFields>()
+  const todo = await update(body)
+  if (!todo) {
+    return c.json({ error: "not found" }, 404)
+  }
+  return c.json(todo)
 })
 
 app.post("/internal/tasks/analyze-todo", async (c) => {

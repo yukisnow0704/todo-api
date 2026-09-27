@@ -23,6 +23,56 @@ export async function getById(id: number): Promise<Todo | undefined> {
         [id]
     )
     return result.rows[0]
+
+
+export type UpdatableFields = {
+    title?: string
+    done?: boolean
+    category?: string
+    priority?: string
+    estimated_minutes?: number
+}
+
+export async function update(
+    id: number,
+    fields: UpdatableFields
+): Promise<Todo | undefined> {
+    const sets: string[] = []
+    const values: (string | boolean | number)[] = []
+    let i = 1
+
+    if (fields.title !== undefined) {
+        sets.push(`title = $${i++}`)
+        values.push(fields.title)
+    }
+    if (fields.done !== undefined) {
+        sets.push(`done = $${i++}`)
+        values.push(fields.done)
+    }
+    if (fields.category !== undefined) {
+        sets.push(`category = $${i++}`)
+        values.push(fields.category)
+    }
+    if (fields.priority !== undefined) {
+        sets.push(`priority = $${i++}`)
+        values.push(fields.priority)
+    }
+    if (fields.estimated_minutes !== undefined) {
+        sets.push(`estimated_minutes = $${i++}`)
+        values.push(fields.estimated_minutes)
+    }
+
+    if (sets.length === 0) {
+        return getById(id)
+    }
+
+    values.push(id as unknown as string)
+    const result = await pool.query<Todo>(
+        `UPDATE todos SET ${sets.join(", ")} WHERE id = $${i}
+        RETURNING id, title, done, category, priority, estimated_minutes`, 
+        values
+    )
+    return result.rows[0]
 }
 
 export async function create(title: string): Promise<Todo> {
