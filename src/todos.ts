@@ -23,7 +23,7 @@ export async function getById(id: number): Promise<Todo | undefined> {
         [id]
     )
     return result.rows[0]
-
+}
 
 export type UpdatableFields = {
     title?: string
