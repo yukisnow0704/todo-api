@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { getAll, getById, create, update, remove } from "./todos.js"
-import { UpdatableFields } from "./todosjs"
+import { UpdatableFields } from "./todos.js"
 import { ensureSchema, pool } from './db.js'
 import { analyzeTodo } from './classify.js'
 import { uiHtml } from './ui.js'
