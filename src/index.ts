@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { getAll, getById, create, update, remove } from "./todos.js"
-import { UpdatableFields } from "./todos.js"
+import type { UpdatableFields } from "./todos.js"
 import { ensureSchema, pool } from './db.js'
 import { analyzeTodo } from './classify.js'
 import { uiHtml } from './ui.js'
@@ -42,7 +42,7 @@ app.post("/api/todos", async (c) => {
 app.patch("/api/todos/:id", async (c) => {
   const id = Number(c.req.param("id"))
   const body = await c.req.json<UpdatableFields>()
-  const todo = await update(body)
+  const todo = await update(id, body)
   if (!todo) {
     return c.json({ error: "not found" }, 404)
   }
