@@ -150,10 +150,9 @@ jobs:
               workflow_id: "deploy.yml",
               event: "pull_request",
               status: "success",
+              head_sha: "${{ steps.find_pr.outputs.pr_head_sha }}",
             });
-            const match = runs.data.workflow_runs.find(
-              (r) => r.head_sha === "${{ steps.find_pr.outputs.pr_head_sha }}"
-            );
+            const match = runs.data.workflow_runs[0];
             if (!match) {
               core.setFailed("対応するplan実行が見つかりませんでした");
               return;
