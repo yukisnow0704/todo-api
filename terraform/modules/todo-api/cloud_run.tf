@@ -8,6 +8,10 @@ resource "google_cloud_run_v2_service" "todo_api" {
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
+    scaling {
+      min_instance_count = 1
+    }
+
     containers {
       # イメージはCI/CDが書き換える前提なので、ここでは現在のタグを指定
       image = "asia-northeast1-docker.pkg.dev/${var.project_id}/todo-api-repo/todo-api:${var.image_tag}"
