@@ -100,3 +100,5 @@ export async function remove(id: number): Promise<boolean> {
     }));
     return (result.rowCount ?? 0) > 0
 }
+
+// test
