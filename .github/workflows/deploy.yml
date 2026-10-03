@@ -37,7 +37,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@<SHA> # v4
+      - uses: actions/checkout@v4 # v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -56,13 +56,13 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@<SHA> # v4
+      - uses: actions/checkout@v4 # v4
 
-      - uses: google-github-actions/auth@<SHA> # v2
+      - uses: google-github-actions/auth@v2 # v2
         with:
           credentials_json: "${{ secrets.GCP_SA_KEY }}"
 
-      - uses: hashicorp/setup-terraform@<SHA> # v4.0.1
+      - uses: hashicorp/setup-terraform@v4.0.1 # v4.0.1
         with:
           terraform_version: "1.16.1"
 
@@ -88,14 +88,14 @@ jobs:
 
       - name: Upload plan file as artifact
         if: steps.plan.outcome == 'success'
-        uses: actions/upload-artifact@<SHA> # v4
+        uses: actions/upload-artifact@v4 # v4
         with:
           name: tfplan-${{ github.event.pull_request.number }}
           path: terraform/environments/production/tfplan
           retention-days: 3
 
       - name: Comment plan result on PR
-        uses: actions/github-script@<SHA> # v7
+        uses: actions/github-script@v7 # v7
         with:
           script: |
             const output = `#### Terraform Plan
@@ -119,11 +119,11 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@<SHA> # v4
+      - uses: actions/checkout@v4 # v4
 
       - name: Find the merged PR for this commit
         id: find_pr
-        uses: actions/github-script@<SHA> # v7
+        uses: actions/github-script@v7 # v7
         with:
           script: |
             const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
@@ -141,7 +141,7 @@ jobs:
 
       - name: Find the plan workflow run for that PR
         id: find_run
-        uses: actions/github-script@<SHA> # v7
+        uses: actions/github-script@v7 # v7
         with:
           script: |
             const runs = await github.rest.actions.listWorkflowRuns({
@@ -161,18 +161,18 @@ jobs:
             core.setOutput("run_id", match.id);
 
       - name: Download the saved plan file
-        uses: actions/download-artifact@<SHA> # v4
+        uses: actions/download-artifact@v4 # v4
         with:
           name: tfplan-${{ steps.find_pr.outputs.pr_number }}
           path: terraform/environments/production
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ steps.find_run.outputs.run_id }}
 
-      - uses: google-github-actions/auth@<SHA> # v2
+      - uses: google-github-actions/auth@v2 # v2
         with:
           credentials_json: "${{ secrets.GCP_SA_KEY }}"
 
-      - uses: google-github-actions/setup-gcloud@<SHA> # v2
+      - uses: google-github-actions/setup-gcloud@v2 # v2
 
       - name: Configure Docker
         run: gcloud auth configure-docker asia-northeast1-docker.pkg.dev
@@ -182,7 +182,7 @@ jobs:
           docker build -t asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/todo-api-repo/todo-api:${{ steps.find_pr.outputs.pr_head_sha }} .
           docker push asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/todo-api-repo/todo-api:${{ steps.find_pr.outputs.pr_head_sha }}
 
-      - uses: hashicorp/setup-terraform@<SHA> # v4.0.1
+      - uses: hashicorp/setup-terraform@v4.0.1 # v4.0.1
         with:
           terraform_version: "1.16.1"
 
