@@ -12,3 +12,7 @@ module "todo_api" {
 output "cloud_run_url" {
   value       = module.todo_api.cloud_run_url
 }
+
+output "deployed_by" {
+  value       = "terraform"
+}
