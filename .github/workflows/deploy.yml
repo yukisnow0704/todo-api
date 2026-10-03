@@ -11,6 +11,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  actions: read
 
 concurrency:
   group: terraform-production
@@ -36,7 +37,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@<SHA> # v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -55,15 +56,15 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@<SHA> # v4
 
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@<SHA> # v2
         with:
           credentials_json: "${{ secrets.GCP_SA_KEY }}"
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@<SHA> # v4.0.1
         with:
-          terraform_version: "1.9.8"
+          terraform_version: "1.16.1"
 
       - name: Terraform Init
         working-directory: terraform/environments/production
@@ -72,7 +73,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: terraform/environments/production
-        run: terraform plan -no-color -var="image_tag=${{ github.sha }}"
+        run: terraform plan -no-color -out=tfplan -var="image_tag=${{ github.event.pull_request.head.sha }}"
         continue-on-error: true
         env:
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
@@ -80,8 +81,21 @@ jobs:
           TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
           TF_VAR_alert_email: ${{ secrets.ALERT_EMAIL }}
 
+      - name: Show plan (human readable, for the PR comment)
+        if: steps.plan.outcome == 'success'
+        working-directory: terraform/environments/production
+        run: terraform show -no-color tfplan
+
+      - name: Upload plan file as artifact
+        if: steps.plan.outcome == 'success'
+        uses: actions/upload-artifact@<SHA> # v4
+        with:
+          name: tfplan-${{ github.event.pull_request.number }}
+          path: terraform/environments/production/tfplan
+          retention-days: 3
+
       - name: Comment plan result on PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@<SHA> # v7
         with:
           script: |
             const output = `#### Terraform Plan
@@ -105,32 +119,78 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@<SHA> # v4
 
-      - uses: google-github-actions/auth@v2
+      - name: Find the merged PR for this commit
+        id: find_pr
+        uses: actions/github-script@<SHA> # v7
+        with:
+          script: |
+            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+            });
+            if (prs.data.length === 0) {
+              core.setFailed("このコミットに対応するPRが見つかりませんでした");
+              return;
+            }
+            const pr = prs.data[0];
+            core.setOutput("pr_number", pr.number);
+            core.setOutput("pr_head_sha", pr.head.sha);
+
+      - name: Find the plan workflow run for that PR
+        id: find_run
+        uses: actions/github-script@<SHA> # v7
+        with:
+          script: |
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: "deploy.yml",
+              event: "pull_request",
+              status: "success",
+            });
+            const match = runs.data.workflow_runs.find(
+              (r) => r.head_sha === "${{ steps.find_pr.outputs.pr_head_sha }}"
+            );
+            if (!match) {
+              core.setFailed("対応するplan実行が見つかりませんでした");
+              return;
+            }
+            core.setOutput("run_id", match.id);
+
+      - name: Download the saved plan file
+        uses: actions/download-artifact@<SHA> # v4
+        with:
+          name: tfplan-${{ steps.find_pr.outputs.pr_number }}
+          path: terraform/environments/production
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ steps.find_run.outputs.run_id }}
+
+      - uses: google-github-actions/auth@<SHA> # v2
         with:
           credentials_json: "${{ secrets.GCP_SA_KEY }}"
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@<SHA> # v2
 
       - name: Configure Docker
         run: gcloud auth configure-docker asia-northeast1-docker.pkg.dev
 
-      - name: Build and push image
+      - name: Build and push image (同じタグでplan時と揃える)
         run: |
-          docker build -t asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/todo-api-repo/todo-api:${{ github.sha }} .
-          docker push asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/todo-api-repo/todo-api:${{ github.sha }}
+          docker build -t asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/todo-api-repo/todo-api:${{ steps.find_pr.outputs.pr_head_sha }} .
+          docker push asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/todo-api-repo/todo-api:${{ steps.find_pr.outputs.pr_head_sha }}
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@<SHA> # v4.0.1
         with:
-          terraform_version: "1.9.8"
+          terraform_version: "1.16.1"
 
-      - name: Terraform apply (production)
+      - name: Terraform apply (保存されたplanをそのまま適用)
         working-directory: terraform/environments/production
         run: |
           terraform init
-          terraform apply -auto-approve -input=false \
-            -var="image_tag=${{ github.sha }}"
+          terraform apply -input=false tfplan
         env:
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
           TF_VAR_region: asia-northeast1
